@@ -17,6 +17,7 @@ pub fn spawn_ffmpeg() -> std::io::Result<(Child, ChildStdin, ChildStdout, ChildS
         // Do *not* add `-fflags nobuffer`: it makes ffmpeg skip the opening IDR +
         // parameter sets, so every P-frame fails with "Could not find ref".
         .args(["-flags", "low_delay"])
+        .args(["-hwaccel", "auto"])
         .args(["-f", "hevc", "-i", "pipe:0"])
         .args([
             "-an",
