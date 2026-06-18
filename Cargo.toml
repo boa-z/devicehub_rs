@@ -1,0 +1,50 @@
+[package]
+name = "devicehub_rs"
+version = "0.1.0"
+edition = "2024"
+description = "Open-source iOS Device Hub: live screen mirror + remote control (touch, keyboard, hardware buttons) over CoreDevice"
+license = "MIT"
+
+[dependencies]
+idevice = { path = "../idevice/idevice", features = ["full"] }
+# `persistence` lets eframe store our VNC settings (host/port/password/enabled)
+# in a platform-appropriate config dir across launches.
+eframe = { version = "0.29", features = ["persistence"] }
+# DES, for verifying the RFB (VNC) authentication challenge response against the
+# user-configured password. cipher 0.4 is already in the tree (via idevice).
+des = "0.8"
+tokio = { version = "1", features = [
+  "rt-multi-thread",
+  "macros",
+  "time",
+  "io-util",
+  "sync",
+  "process",
+] }
+
+uuid = { version = "1", features = ["v4"] }
+# Host clipboard access for two-way clipboard sync. `image-data` enables
+# `get_image`/`set_image` (raw RGBA); the rest of arboard's defaults are
+# platform clipboard backends we don't need on macOS.
+arboard = { version = "3", default-features = false, features = ["image-data"] }
+# Transcode between the device's encoded pasteboard images (PNG/JPEG/TIFF) and
+# arboard's raw RGBA. Only the codecs we sync are enabled.
+image = { version = "0.25", default-features = false, features = [
+  "png",
+  "jpeg",
+  "tiff",
+] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# MCP server: exposes the device's screen + input as tools an agent can call,
+# over streamable HTTP (alongside the egui UI and the VNC server). `server` and
+# `macros` are on by default; we add the streamable-HTTP transport.
+rmcp = { version = "1.7", features = ["transport-streamable-http-server"] }
+# The HTTP server the streamable-HTTP MCP transport mounts into (rmcp targets
+# axum 0.8).
+axum = "0.8"
+# Encode screenshot PNGs as base64 for MCP image content, and build the
+# device-list / status tool payloads.
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
