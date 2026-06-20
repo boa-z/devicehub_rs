@@ -303,7 +303,7 @@ pub async fn manage(
                 cmd = control_rx.recv() => match cmd {
                     Some(ControlCmd::Connect(u)) => target = Some(u),
                     Some(ControlCmd::Refresh) => {}
-                    None => return,
+                    Some(ControlCmd::Quit) | None => return,
                 },
                 _ = tokio::time::sleep(IDLE_RESCAN) => {}
             }
@@ -343,7 +343,7 @@ pub async fn manage(
                     Some(ControlCmd::Refresh) => {
                         device_list.set(enumerate_devices(&mut names).await);
                     }
-                    None => break Next::Quit,
+                    Some(ControlCmd::Quit) | None => break Next::Quit,
                 },
             }
         };

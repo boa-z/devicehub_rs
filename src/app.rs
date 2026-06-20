@@ -734,8 +734,9 @@ impl eframe::App for DeviceHubApp {
 
 impl Drop for DeviceHubApp {
     fn drop(&mut self) {
-        // Closing the control channel tells the manager to stop the live session
-        // cleanly and exit rather than reconnect.
+        if let Some(tx) = &self.control_tx {
+            let _ = tx.send(ControlCmd::Quit);
+        }
         self.control_tx.take();
         if let Some(handle) = self.session_thread.take() {
             let _ = handle.join();
